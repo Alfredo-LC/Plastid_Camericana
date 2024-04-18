@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#SBATCH -A cni_campanula
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:a100:1
+#SBATCH --mem=200000
+#SBATCH --ntasks=1
+#SBATCH --time=6:00:00
+
+module purge
+module load anaconda
+source activate bonito
+module load cuda
+
+list=$1
+
+model="7_final_consensus_PB_VA73~fast5~trained/"
+cudaDevice="cuda:0"
+reference="/scratch/hqc5dj/AL_data/RefGenome/7_final_consensus_PB_VA73.fasta"
+#fast5Dir="/project/lfg_lab/MinionFast5Alfredo/${list}/"
+#fast5Dir="/project/lfg_lab/OriginalMinionFastqs/Run060823/fast5_pass/${list}_fast5/"
+#fast5Dir="/project/lfg_lab/OriginalMinionFastqs/3072023/fast5_pass/${list}_fast5"
+#fast5Dir="/project/lfg_lab/MinionFast5Alfredo/${list}/fast5"
+fast5Dir="/project/lfg_lab/MinionFast5Alfredo/2_10_23/fast5/"
+
+mkdir basecalling_${list}
+
+bonito basecaller $model        \
+    --device $cudaDevice        \
+    --reference $reference      \
+    $fast5Dir                   \
+    > basecalling_${list}/${list}.sam
